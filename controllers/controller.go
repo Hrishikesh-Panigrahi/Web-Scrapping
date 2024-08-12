@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -15,33 +16,41 @@ type Product struct {
 	Url, Image, Name, Price string
 }
 
+// Index is a controller to render the index.html file
 func Index(c *gin.Context) {
 	if c.Request.Method == "GET" {
 		c.HTML(http.StatusOK, "index.html", gin.H{})
 	}
 }
 
+// WebCrawler is a controller to crawl the web
+// and it saves the data in products.csv file
+// and redirects to /web-crawler route
 func WebCrawler(c *gin.Context) {
-
 	if c.Request.Method == "POST" {
 
 		var products []Product
 
-		url := c.PostForm("url")
-		fmt.Println(url)
+		keyword := c.PostForm("keyword")
+		encodedKeyword := url.QueryEscape(keyword)
+
+		searchURL := fmt.Sprintf("https://www.amazon.in/s?k=%s", encodedKeyword)
 
 		collector := colly.NewCollector(
-			colly.AllowedDomains("www.scrapingcourse.com"),
+			colly.AllowedDomains("www.scrapingcourse.com", "www.amazon.in", "www.flipkart.com"),
 		)
 
-		collector.OnHTML("li.product", func(e *colly.HTMLElement) {
-			product := Product{}
-			product.Url = e.ChildAttr("a", "href")
-			product.Image = e.ChildAttr("img", "src")
-			product.Name = e.ChildText(".product-name")
-			product.Price = e.ChildText(".price")
+		collector.OnHTML("div.s-result-list.s-search-results.sg-row", func(e *colly.HTMLElement) {
+			e.ForEach("div.a-section.a-spacing-base", func(_ int, h *colly.HTMLElement) {
+				product := Product{}
 
-			products = append(products, product)
+				product.Name = h.ChildText("span.a-size-base-plus.a-color-base.a-text-normal")
+				product.Price = h.ChildText("span.a-price-whole")
+				product.Url = h.ChildAttr("a.a-link-normal.s-no-outline", "href")
+				product.Image = h.ChildAttr("img.s-image", "src")
+
+				products = append(products, product)
+			})
 		})
 
 		collector.OnRequest(func(r *colly.Request) {
@@ -57,19 +66,14 @@ func WebCrawler(c *gin.Context) {
 		})
 
 		collector.OnScraped(func(r *colly.Response) {
-			log.Printf("Number of products collected: %d", len(products))
-
-			// open the CSV file
 			file, err := os.Create("products.csv")
 			if err != nil {
 				log.Fatalln("Failed to create output CSV file", err)
 			}
 			defer file.Close()
 
-			// initialize a file writer
 			writer := csv.NewWriter(file)
 
-			// write the CSV headers
 			headers := []string{
 				"Url",
 				"Image",
@@ -79,7 +83,6 @@ func WebCrawler(c *gin.Context) {
 			writer.Write(headers)
 
 			for _, product := range products {
-				// convert a Product to an array of strings
 				record := []string{
 					product.Url,
 					product.Image,
@@ -94,15 +97,23 @@ func WebCrawler(c *gin.Context) {
 			}
 		})
 
-		collector.Visit("https://www.scrapingcourse.com/ecommerce")
+		collector.Visit(searchURL)
+
+		c.Redirect(http.StatusMovedPermanently, "/web-crawler")
 	}
 
+}
+
+// ShowResults is a controller to render the web_crawler.html file
+// and it reads the data from products.csv file
+// and renders the data in the web_crawler.html file
+func ShowResults(c *gin.Context) {
 	if c.Request.Method == "GET" {
-		type body struct {
+		type Productbody struct {
 			Url, Image, Name, Price string
 		}
 
-		var bodyreq []body
+		var productbody []Productbody
 		file, err := os.Open("products.csv")
 		if err != nil {
 			log.Fatalln("Failed to open CSV file", err)
@@ -120,18 +131,16 @@ func WebCrawler(c *gin.Context) {
 			if i == 0 {
 				continue
 			}
-			singleproduct := body{
+			singleproduct := Productbody{
 				Url:   record[0],
 				Image: record[1],
 				Name:  record[2],
 				Price: record[3],
 			}
-			bodyreq = append(bodyreq, singleproduct)
-
+			productbody = append(productbody, singleproduct)
 		}
-		c.HTML(http.StatusOK, "index.html", gin.H{
-			"bodyreq": bodyreq,
+		c.HTML(http.StatusOK, "web_crawler.html", gin.H{
+			"Productbody": productbody,
 		})
 	}
-
 }
