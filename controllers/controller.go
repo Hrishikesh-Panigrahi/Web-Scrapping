@@ -23,10 +23,10 @@ func Index(c *gin.Context) {
 	}
 }
 
-// WebCrawler is a controller to crawl the web
+// WebScrapper is a controller to crawl the web
 // and it saves the data in products.csv file
 // and redirects to /web-crawler route
-func WebCrawler(c *gin.Context) {
+func WebScrapper(c *gin.Context) {
 	if c.Request.Method == "POST" {
 
 		var products []Product
@@ -40,13 +40,13 @@ func WebCrawler(c *gin.Context) {
 			colly.AllowedDomains("www.scrapingcourse.com", "www.amazon.in", "www.flipkart.com"),
 		)
 
-		collector.OnHTML("div.s-result-list.s-search-results.sg-row", func(e *colly.HTMLElement) {
-			e.ForEach("div.a-section.a-spacing-base", func(_ int, h *colly.HTMLElement) {
+		collector.OnHTML("div.s-main-slot.s-result-list", func(e *colly.HTMLElement) {
+			e.ForEach("div[data-component-type='s-search-result']", func(_ int, h *colly.HTMLElement) {
 				product := Product{}
 
-				product.Name = h.ChildText("span.a-size-base-plus.a-color-base.a-text-normal")
+				product.Name = h.ChildText("span.a-text-normal")
 				product.Price = h.ChildText("span.a-price-whole")
-				product.Url = h.ChildAttr("a.a-link-normal.s-no-outline", "href")
+				product.Url = fmt.Sprintf("www.amazon.in%s", h.ChildAttr("a.a-link-normal.s-no-outline", "href"))
 				product.Image = h.ChildAttr("img.s-image", "src")
 
 				products = append(products, product)
@@ -66,35 +66,7 @@ func WebCrawler(c *gin.Context) {
 		})
 
 		collector.OnScraped(func(r *colly.Response) {
-			file, err := os.Create("products.csv")
-			if err != nil {
-				log.Fatalln("Failed to create output CSV file", err)
-			}
-			defer file.Close()
-
-			writer := csv.NewWriter(file)
-
-			headers := []string{
-				"Url",
-				"Image",
-				"Name",
-				"Price",
-			}
-			writer.Write(headers)
-
-			for _, product := range products {
-				record := []string{
-					product.Url,
-					product.Image,
-					product.Name,
-					product.Price,
-				}
-				writer.Write(record)
-			}
-			defer writer.Flush()
-			for _, list := range products {
-				fmt.Println(list)
-			}
+			saveCSV(products)
 		})
 
 		collector.Visit(searchURL)

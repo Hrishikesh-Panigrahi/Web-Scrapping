@@ -9,9 +9,8 @@ func main() {
 	r := gin.Default()
 	r.LoadHTMLGlob("templates/*")
 
-	
 	r.GET("/", controllers.Index)
-	r.POST("/web-crawler", controllers.WebCrawler)
+	r.POST("/web-crawler", controllers.WebScrapper)
 	r.GET("/web-crawler", controllers.ShowResults)
 
 	r.Run()
