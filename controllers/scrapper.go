@@ -53,6 +53,7 @@ func FlipkartScrapper(encodedKeyword string, products *[]Product) {
 
 	collector := colly.NewCollector(
 		colly.AllowedDomains(
+			"flipkart.com",
 			"www.flipkart.com",
 		),
 	)
@@ -65,6 +66,9 @@ func FlipkartScrapper(encodedKeyword string, products *[]Product) {
 			product := Product{}
 
 			product.Name = h.ChildText("a.IRpwTa")
+			if product.Name == "" {
+				product.Name = e.ChildText("a._2rpwqI")
+			}
 			product.Price = h.ChildText("div._30jeq3")
 			product.Url = fmt.Sprintf("www.flipkart.com%s", h.ChildAttr("a.IRpwTa", "href"))
 			product.Image = h.ChildAttr("img._396cs4", "src")
