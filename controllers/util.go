@@ -20,6 +20,7 @@ func saveCSV(products []Product) {
 		"Image",
 		"Name",
 		"Price",
+		"Source",
 	}
 	writer.Write(headers)
 
@@ -29,6 +30,7 @@ func saveCSV(products []Product) {
 			product.Image,
 			product.Name,
 			product.Price,
+			product.Source,
 		}
 		writer.Write(record)
 	}

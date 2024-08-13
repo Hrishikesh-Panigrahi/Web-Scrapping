@@ -2,18 +2,16 @@ package controllers
 
 import (
 	"encoding/csv"
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gocolly/colly"
 )
 
 type Product struct {
-	Url, Image, Name, Price string
+	Url, Image, Name, Price, Source string
 }
 
 // Index is a controller to render the index.html file
@@ -32,44 +30,22 @@ func WebScrapper(c *gin.Context) {
 		var products []Product
 
 		keyword := c.PostForm("keyword")
+		amazonbutton := c.PostForm("amazonbutton")
+		flipkartbutton := c.PostForm("flipkartbutton")
+		searchall := c.PostForm("searchall")
+
 		encodedKeyword := url.QueryEscape(keyword)
 
-		searchURL := fmt.Sprintf("https://www.amazon.in/s?k=%s", encodedKeyword)
+		if amazonbutton == "amazon" {
+			AmazonScrapper(encodedKeyword, &products)
+		} else if flipkartbutton == "flipkart" {
+			FlipkartScrapper(encodedKeyword, &products)
+		} else if searchall == "searchall" {
+			AmazonScrapper(encodedKeyword, &products)
+			FlipkartScrapper(encodedKeyword, &products)
+		}
 
-		collector := colly.NewCollector(
-			colly.AllowedDomains("www.scrapingcourse.com", "www.amazon.in", "www.flipkart.com"),
-		)
-
-		collector.OnHTML("div.s-main-slot.s-result-list", func(e *colly.HTMLElement) {
-			e.ForEach("div[data-component-type='s-search-result']", func(_ int, h *colly.HTMLElement) {
-				product := Product{}
-
-				product.Name = h.ChildText("span.a-text-normal")
-				product.Price = h.ChildText("span.a-price-whole")
-				product.Url = fmt.Sprintf("www.amazon.in%s", h.ChildAttr("a.a-link-normal.s-no-outline", "href"))
-				product.Image = h.ChildAttr("img.s-image", "src")
-
-				products = append(products, product)
-			})
-		})
-
-		collector.OnRequest(func(r *colly.Request) {
-			fmt.Println("Visiting", r.URL.String())
-		})
-
-		collector.OnError(func(_ *colly.Response, err error) {
-			fmt.Println("Something went wrong: ", err)
-		})
-
-		collector.OnResponse(func(r *colly.Response) {
-			fmt.Println("Page visited: ", r.Request.URL)
-		})
-
-		collector.OnScraped(func(r *colly.Response) {
-			saveCSV(products)
-		})
-
-		collector.Visit(searchURL)
+		saveCSV(products)
 
 		c.Redirect(http.StatusMovedPermanently, "/web-crawler")
 	}
@@ -82,7 +58,7 @@ func WebScrapper(c *gin.Context) {
 func ShowResults(c *gin.Context) {
 	if c.Request.Method == "GET" {
 		type Productbody struct {
-			Url, Image, Name, Price string
+			Url, Image, Name, Price, Source string
 		}
 
 		var productbody []Productbody
@@ -104,10 +80,11 @@ func ShowResults(c *gin.Context) {
 				continue
 			}
 			singleproduct := Productbody{
-				Url:   record[0],
-				Image: record[1],
-				Name:  record[2],
-				Price: record[3],
+				Url:    record[0],
+				Image:  record[1],
+				Name:   record[2],
+				Price:  record[3],
+				Source: record[4],
 			}
 			productbody = append(productbody, singleproduct)
 		}
