@@ -2,7 +2,6 @@ package controllers
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/gocolly/colly"
 )
@@ -27,7 +26,9 @@ func AmazonScrapper(encodedKeyword string, products *[]Product) {
 			product.Image = h.ChildAttr("img.s-image", "src")
 			product.Source = "Amazon"
 
-			*products = append(*products, product)
+			if product.Name != "" && product.Price != "" && product.Url != "" {
+				*products = append(*products, product)
+			}
 		})
 	})
 
@@ -47,40 +48,76 @@ func AmazonScrapper(encodedKeyword string, products *[]Product) {
 
 }
 
-func FlipkartScrapper(encodedKeyword string, products *[]Product) {
+func EbayScrapper(encodedKeyword string, products *[]Product) {
 
-	searchURL := fmt.Sprintf("https://www.flipkart.com/search?q=%s", encodedKeyword)
+	searchURL := fmt.Sprintf("https://www.ebay.com/sch/i.html?_nkw=%s", encodedKeyword)
 
 	collector := colly.NewCollector(
 		colly.AllowedDomains(
-			"flipkart.com",
-			"www.flipkart.com",
+			"www.ebay.com",
 		),
 	)
 
-	// Set the timeout for the collector
-	collector.SetRequestTimeout(30 * time.Second)
+	collector.OnHTML("li.s-item", func(e *colly.HTMLElement) {
 
-	collector.OnHTML("div._1YokD2._3Mn1Gg", func(e *colly.HTMLElement) {
-		e.ForEach("div._1AtVbE", func(_ int, h *colly.HTMLElement) {
-			product := Product{}
+		product := Product{}
 
-			product.Name = h.ChildText("a.IRpwTa")
-			if product.Name == "" {
-				product.Name = e.ChildText("a._2rpwqI")
-			}
-			product.Price = h.ChildText("div._30jeq3")
-			product.Url = fmt.Sprintf("www.flipkart.com%s", h.ChildAttr("a.IRpwTa", "href"))
-			product.Image = h.ChildAttr("img._396cs4", "src")
-			product.Source = "Flipkart"
+		product.Name = e.ChildText(".s-item__title")
+		product.Price = e.ChildText(".s-item__price")
+		product.Url = fmt.Sprintf("www.ebay.com%s", e.ChildAttr("a.s-item__link", "href"))
+		product.Image = e.ChildAttr("img.s-item__image-img", "src")
+		product.Source = "Ebay"
 
+		if product.Name != "" && product.Price != "" && product.Url != "" {
 			*products = append(*products, product)
-		})
+		}
+
 	})
 
 	collector.OnRequest(func(r *colly.Request) {
 		fmt.Println("Visiting", r.URL.String())
-		r.Headers.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
+	})
+
+	collector.OnError(func(_ *colly.Response, err error) {
+		fmt.Println("Something went wrong: ", err)
+	})
+
+	collector.OnResponse(func(r *colly.Response) {
+		fmt.Println("Page visited: ", r.Request.URL)
+	})
+
+	collector.Visit(searchURL)
+
+}
+
+func WallMartScrapper(encodedKeyword string, products *[]Product) {
+
+	searchURL := fmt.Sprintf("https://www.walmart.com/search/?query=%s", encodedKeyword)
+
+	collector := colly.NewCollector(
+		colly.AllowedDomains(
+			"www.walmart.com",
+		),
+	)
+
+	collector.OnHTML("div.search-result-gridview-item", func(e *colly.HTMLElement) {
+
+		product := Product{}
+
+		product.Name = e.ChildText("a.product-title-link span")
+		product.Price = e.ChildText("span.price-characteristic")
+		product.Url = fmt.Sprintf("https://www.walmart.com%s", e.ChildAttr("a.product-title-link", "href"))
+		product.Image = e.ChildAttr("img", "src")
+		product.Source = "WallMart"
+
+		if product.Name != "" && product.Price != "" && product.Url != "" {
+			*products = append(*products, product)
+		}
+
+	})
+
+	collector.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL.String())
 	})
 
 	collector.OnError(func(_ *colly.Response, err error) {

@@ -31,18 +31,19 @@ func WebScrapper(c *gin.Context) {
 
 		keyword := c.PostForm("keyword")
 		amazonbutton := c.PostForm("amazonbutton")
-		flipkartbutton := c.PostForm("flipkartbutton")
+		EbayButton := c.PostForm("EbayButton")
 		searchall := c.PostForm("searchall")
 
 		encodedKeyword := url.QueryEscape(keyword)
 
 		if amazonbutton == "amazon" {
 			AmazonScrapper(encodedKeyword, &products)
-		} else if flipkartbutton == "flipkart" {
-			FlipkartScrapper(encodedKeyword, &products)
+		} else if EbayButton == "Ebay" {
+			EbayScrapper(encodedKeyword, &products)
 		} else if searchall == "searchall" {
 			AmazonScrapper(encodedKeyword, &products)
-			FlipkartScrapper(encodedKeyword, &products)
+			EbayScrapper(encodedKeyword, &products)
+			WallMartScrapper(encodedKeyword, &products)
 		}
 
 		saveCSV(products)
