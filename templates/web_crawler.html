@@ -4,51 +4,335 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Crawler Results</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Search Results - Smart Web Crawler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'gradient': 'gradient 6s ease infinite',
+                        'fadeIn': 'fadeIn 0.5s ease-out',
+                        'slideUp': 'slideUp 0.3s ease-out',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 
-<body class="bg-gray-100 flex justify-center items-start min-h-screen p-4">
-    <div class="container mx-auto">
-        <div class="bg-white p-8 rounded shadow-md">
-            <h1 class="text-2xl font-semibold mb-6 text-center">Web Crawler</h1>
-            <div class="overflow-x-auto">
-                <table class="min-w-full bg-white border border-gray-300 rounded-lg">
-                    <thead>
-                        <tr>
-                            <th class="py-2 px-4 border-b">Image</th>
-                            <th class="py-2 px-4 border-b">Name</th>
-                            <th class="py-2 px-4 border-b">Price</th>
-                            <th class="py-2 px-4 border-b">Link</th>
-                            <th class="py-2 px-4 border-b">Source</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{range .Productbody}}
-                        <tr class="hover:bg-gray-100 transition-colors">
-                            <td class="py-2 px-4 border-b">
-                                <img src="{{.Image}}" alt="{{.Name}}" class="w-16 h-16 object-cover rounded-md">
-                            </td>
-                            <td class="py-2 px-4 border-b">
-                                {{.Name}}
-                            </td>
-                            <td class="py-2 px-4 border-b text-blue-600 font-semibold">
-                                {{.Price}}
-                            </td>
-                            <td class="py-2 px-4 border-b">
-                                <a href="https://{{.Url}}" target="_blank" class="text-blue-500 hover:underline">View
-                                    Product</a>
-                            </td>
-                            <td class="py-2 px-4 border-b">
-                                {{.Source}}
-                            </td>
-                        </tr>
-                        {{end}}
-                    </tbody>
-                </table>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 animate-gradient font-sans">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="relative z-10 p-6">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <a href="/" class="flex items-center space-x-2 text-white hover:text-blue-300 transition-colors">
+                <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                <span class="text-lg font-semibold">Back to Search</span>
+            </a>
+            <div class="flex items-center space-x-2 text-white">
+                <i data-lucide="search" class="w-5 h-5"></i>
+                <span class="text-lg font-semibold">Smart Web Crawler</span>
             </div>
         </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="relative z-10 max-w-7xl mx-auto px-4 pb-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
+                Search Results
+            </h1>
+            <p class="text-gray-300 text-lg">
+                Found {{len .Productbody}} products across multiple platforms
+            </p>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="mb-8 bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+            <div class="flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-4">
+                    <label class="text-white font-medium">Sort by:</label>
+                    <select id="sortSelect" class="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="default">Default</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="name">Name: A to Z</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <label class="text-white font-medium">Filter by Platform:</label>
+                    <select id="platformFilter" class="bg-white/20 text-white border border-white/30 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="all">All Platforms</option>
+                        <option value="Amazon">Amazon</option>
+                        <option value="Ebay">eBay</option>
+                        <option value="WallMart">Walmart</option>
+                    </select>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button id="gridView" class="p-2 bg-blue-600 text-white rounded-lg transition-colors">
+                        <i data-lucide="grid-3x3" class="w-5 h-5"></i>
+                    </button>
+                    <button id="listView" class="p-2 bg-white/20 text-white rounded-lg hover:bg-white/30 transition-colors">
+                        <i data-lucide="list" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Container -->
+        <div id="resultsContainer">
+            {{if .Productbody}}
+            <!-- Grid View -->
+            <div id="gridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {{range $index, $product := .Productbody}}
+                <div class="product-card bg-white/10 backdrop-blur-md rounded-2xl overflow-hidden border border-white/20 hover:bg-white/20 transition-all duration-300 hover:scale-105 hover:shadow-2xl animate-fadeIn"
+                     data-price="{{.Price}}" data-name="{{.Name}}" data-source="{{.Source}}">
+                    
+                    <!-- Product Image -->
+                    <div class="relative overflow-hidden bg-white/5">
+                        {{if .Image}}
+                            <img src="{{.Image}}" alt="{{.Name}}" class="w-full h-48 object-cover" loading="lazy" 
+                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'">
+                        {{else}}
+                            <div class="w-full h-48 bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                                <i data-lucide="image" class="w-12 h-12 text-gray-400"></i>
+                            </div>
+                        {{end}}
+                        
+                        <!-- Source Badge -->
+                        <div class="absolute top-3 right-3">
+                            {{if eq .Source "Amazon"}}
+                                <span class="bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium">Amazon</span>
+                            {{else if eq .Source "Ebay"}}
+                                <span class="bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium">eBay</span>
+                            {{else if eq .Source "WallMart"}}
+                                <span class="bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium">Walmart</span>
+                            {{else}}
+                                <span class="bg-purple-500 text-white px-2 py-1 rounded-full text-xs font-medium">{{.Source}}</span>
+                            {{end}}
+                        </div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="p-4">
+                        <h3 class="text-white font-semibold text-lg mb-2 line-clamp-2 leading-tight">{{.Name}}</h3>
+                        
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-2xl font-bold text-green-400">{{.Price}}</span>
+                        </div>
+
+                        <a href="https://{{.Url}}" target="_blank" 
+                           class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:scale-105 flex items-center justify-center group">
+                            <span class="mr-2">View Product</span>
+                            <i data-lucide="external-link" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                        </a>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+
+            <!-- List View (Hidden by default) -->
+            <div id="listContainer" class="hidden space-y-4">
+                {{range $index, $product := .Productbody}}
+                <div class="product-card bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 animate-slideUp"
+                     data-price="{{.Price}}" data-name="{{.Name}}" data-source="{{.Source}}">
+                    <div class="flex items-center space-x-6">
+                        <!-- Product Image -->
+                        <div class="flex-shrink-0">
+                            {{if .Image}}
+                                <img src="{{.Image}}" alt="{{.Name}}" class="w-20 h-20 object-cover rounded-xl" loading="lazy"
+                                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik03NSA3NUgxMjVWMTI1SDc1Vjc1WiIgZmlsbD0iIzlDQTNBRiIvPgo8L3N2Zz4K'">
+                            {{else}}
+                                <div class="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-xl flex items-center justify-center">
+                                    <i data-lucide="image" class="w-8 h-8 text-gray-400"></i>
+                                </div>
+                            {{end}}
+                        </div>
+
+                        <!-- Product Details -->
+                        <div class="flex-grow">
+                            <h3 class="text-white font-semibold text-xl mb-2">{{.Name}}</h3>
+                            <div class="flex items-center space-x-4">
+                                <span class="text-2xl font-bold text-green-400">{{.Price}}</span>
+                                {{if eq .Source "Amazon"}}
+                                    <span class="bg-orange-500 text-white px-3 py-1 rounded-full text-sm font-medium">Amazon</span>
+                                {{else if eq .Source "Ebay"}}
+                                    <span class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">eBay</span>
+                                {{else if eq .Source "WallMart"}}
+                                    <span class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">Walmart</span>
+                                {{else}}
+                                    <span class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium">{{.Source}}</span>
+                                {{end}}
+                            </div>
+                        </div>
+
+                        <!-- Action Button -->
+                        <div class="flex-shrink-0">
+                            <a href="https://{{.Url}}" target="_blank" 
+                               class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-105 flex items-center group">
+                                <span class="mr-2">View Product</span>
+                                <i data-lucide="external-link" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {{end}}
+            </div>
+            {{else}}
+            <!-- Empty State -->
+            <div class="text-center py-16">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-white/10 rounded-full mb-6">
+                    <i data-lucide="search-x" class="w-10 h-10 text-gray-400"></i>
+                </div>
+                <h3 class="text-2xl font-semibold text-white mb-4">No Results Found</h3>
+                <p class="text-gray-300 mb-8">Try searching with different keywords or check different platforms.</p>
+                <a href="/" class="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-105">
+                    <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                    Try Another Search
+                </a>
+            </div>
+            {{end}}
+        </div>
     </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // View toggle functionality
+        const gridView = document.getElementById('gridView');
+        const listView = document.getElementById('listView');
+        const gridContainer = document.getElementById('gridContainer');
+        const listContainer = document.getElementById('listContainer');
+
+        gridView.addEventListener('click', () => {
+            gridContainer.classList.remove('hidden');
+            listContainer.classList.add('hidden');
+            gridView.classList.add('bg-blue-600');
+            gridView.classList.remove('bg-white/20');
+            listView.classList.remove('bg-blue-600');
+            listView.classList.add('bg-white/20');
+        });
+
+        listView.addEventListener('click', () => {
+            gridContainer.classList.add('hidden');
+            listContainer.classList.remove('hidden');
+            listView.classList.add('bg-blue-600');
+            listView.classList.remove('bg-white/20');
+            gridView.classList.remove('bg-blue-600');
+            gridView.classList.add('bg-white/20');
+        });
+
+        // Sorting functionality
+        const sortSelect = document.getElementById('sortSelect');
+        sortSelect.addEventListener('change', (e) => {
+            const sortValue = e.target.value;
+            const productCards = Array.from(document.querySelectorAll('.product-card'));
+            
+            productCards.sort((a, b) => {
+                switch(sortValue) {
+                    case 'price-low':
+                        return parsePrice(a.dataset.price) - parsePrice(b.dataset.price);
+                    case 'price-high':
+                        return parsePrice(b.dataset.price) - parsePrice(a.dataset.price);
+                    case 'name':
+                        return a.dataset.name.localeCompare(b.dataset.name);
+                    default:
+                        return 0;
+                }
+            });
+
+            // Re-append sorted elements
+            const gridParent = gridContainer;
+            const listParent = listContainer;
+            
+            productCards.forEach((card, index) => {
+                const gridCard = card.cloneNode(true);
+                const listCard = card.cloneNode(true);
+                
+                if (index === 0) {
+                    gridParent.innerHTML = '';
+                    listParent.innerHTML = '';
+                }
+                
+                // Apply animation delays
+                gridCard.style.animationDelay = `${index * 0.1}s`;
+                listCard.style.animationDelay = `${index * 0.05}s`;
+                
+                gridParent.appendChild(gridCard);
+                listParent.appendChild(listCard);
+            });
+            
+            lucide.createIcons();
+        });
+
+        // Platform filtering
+        const platformFilter = document.getElementById('platformFilter');
+        platformFilter.addEventListener('change', (e) => {
+            const filterValue = e.target.value;
+            const productCards = document.querySelectorAll('.product-card');
+            
+            productCards.forEach(card => {
+                if (filterValue === 'all' || card.dataset.source === filterValue) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Helper function to parse price
+        function parsePrice(priceString) {
+            return parseFloat(priceString.replace(/[^0-9.]/g, '')) || 0;
+        }
+
+        // Add animation delays to cards
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add staggered animation delays to grid cards
+            const gridCards = document.querySelectorAll('#gridContainer .product-card');
+            gridCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+
+            // Add staggered animation delays to list cards
+            const listCards = document.querySelectorAll('#listContainer .product-card');
+            listCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.05}s`;
+            });
+        });
+    </script>
 </body>
 
 </html>

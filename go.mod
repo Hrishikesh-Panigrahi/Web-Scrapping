@@ -3,8 +3,10 @@ module github.com/Hrishikesh-Panigrahi/Web-Scrapping
 go 1.22.6
 
 require (
+	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/gocolly/colly v1.2.0
+	golang.org/x/time v0.5.0
 )
 
 require (

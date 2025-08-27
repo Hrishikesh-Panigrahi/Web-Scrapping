@@ -1,0 +1,27 @@
+# Web Crawler Configuration Template
+# Copy this file to .env and modify values as needed
+
+# Application Environment
+ENVIRONMENT=development
+PORT=8080
+
+# File Storage
+CSV_PATH=products.csv
+
+# Performance Settings
+MAX_RESULTS=100
+REQUEST_TIMEOUT=30
+RATE_LIMIT_RPM=5
+
+# Logging
+LOG_LEVEL=info
+
+# CORS Settings
+ALLOWED_ORIGIN_1=http://localhost:8080
+ALLOWED_ORIGIN_2=http://127.0.0.1:8080
+
+# Production Settings (uncomment for production)
+# ENVIRONMENT=production
+# GIN_MODE=release
+# RATE_LIMIT_RPM=10
+# REQUEST_TIMEOUT=60

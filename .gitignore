@@ -1,3 +1,5 @@
 tmp
 
-products.csv
+*.csv
+
+*.exe

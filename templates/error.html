@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error - Smart Web Crawler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'gradient': 'gradient 6s ease infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 animate-gradient font-sans">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-red-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-orange-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style="animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+        <!-- Error Icon -->
+        <div class="inline-flex items-center justify-center w-24 h-24 bg-red-500/20 backdrop-blur-md rounded-full mb-8 border border-red-500/30">
+            <i data-lucide="alert-circle" class="w-12 h-12 text-red-400"></i>
+        </div>
+
+        <!-- Error Message -->
+        <div class="text-center max-w-2xl mx-auto">
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+                Oops! Something went wrong
+            </h1>
+            
+            <p class="text-xl text-gray-300 mb-2">
+                {{if .Error}}{{.Error}}{{else}}An unexpected error occurred{{end}}
+            </p>
+            
+            {{if .Details}}
+            <p class="text-gray-400 mb-8">
+                {{.Details}}
+            </p>
+            {{end}}
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/" class="inline-flex items-center bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 hover:scale-105">
+                    <i data-lucide="home" class="w-5 h-5 mr-2"></i>
+                    Go to Home
+                </a>
+                
+                <button onclick="window.history.back()" class="inline-flex items-center bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-3 px-6 rounded-xl hover:bg-white/20 transition-all duration-200">
+                    <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i>
+                    Go Back
+                </button>
+                
+                <button onclick="window.location.reload()" class="inline-flex items-center bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-3 px-6 rounded-xl hover:bg-white/20 transition-all duration-200">
+                    <i data-lucide="refresh-cw" class="w-5 h-5 mr-2"></i>
+                    Try Again
+                </button>
+            </div>
+        </div>
+
+        <!-- Support Info -->
+        <div class="mt-12 text-center">
+            <p class="text-gray-400 text-sm">
+                If this problem persists, please try again later or contact support.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>

@@ -4,46 +4,262 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web Crawler</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <title>Smart Web Crawler - Find Best Deals</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'gradient': 'gradient 6s ease infinite',
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-soft': 'pulse-soft 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'left center'
+                            },
+                            '50%': {
+                                'background-size': '200% 200%',
+                                'background-position': 'right center'
+                            },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        },
+                        'pulse-soft': {
+                            '0%, 100%': { opacity: '1' },
+                            '50%': { opacity: '.8' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
 </head>
 
-<body class="bg-gray-100 flex justify-center items-center h-screen">
-    <div class="bg-white p-8 rounded shadow-md w-full max-w-sm">
-        <h1 class="text-2xl font-semibold mb-6 text-center">Web Crawler</h1>
-        <form action="/web-crawler" method="POST" class="space-y-4 p-4 max-w-md mx-auto bg-white rounded-lg">
-            <div class="space-y-2">
-                <input type="text" name="keyword" placeholder="Enter Keyword"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    required>
-                <div class="space-y-2">
-                    <div class="flex items-center">
-                        <input type="checkbox" name="amazonbutton" id="amazonbutton" value="amazon"
-                            class="mr-2 h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="amazonbutton" class="text-gray-700">Amazon</label>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 animate-gradient font-sans">
+    <!-- Background Effects -->
+    <div class="absolute inset-0 overflow-hidden">
+        <div class="absolute -top-40 -right-40 w-80 h-80 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
+        <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style="animation-delay: 2s;"></div>
+        <div class="absolute top-40 left-40 w-60 h-60 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float" style="animation-delay: 4s;"></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="relative z-10 flex flex-col items-center justify-center min-h-screen p-4">
+        <!-- Header -->
+        <div class="text-center mb-8 animate-fade-in">
+            <h1 class="text-5xl md:text-6xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent leading-tight">
+                Smart Web Crawler
+            </h1>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                Discover the best deals across multiple e-commerce platforms with our intelligent product search engine
+            </p>
+        </div>
+
+        <!-- Search Form -->
+        <div class="w-full max-w-md">
+            <form id="searchForm" action="/web-crawler" method="POST" class="space-y-6">
+                <!-- Search Input -->
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <i data-lucide="search" class="h-5 w-5 text-gray-400"></i>
                     </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" name="EbayButton" id="EbayButton" value="Ebay"
-                            class="mr-2 h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="flipkartbutton" class="text-gray-700">Ebay</label>
-                    </div>
-                    <div class="flex items-center">
-                        <input type="checkbox" name="searchall" id="searchall" value="searchall"
-                            class="mr-2 h-4 w-4 text-blue-500 border-gray-300 rounded focus:ring-blue-500">
-                        <label for="searchall" class="text-gray-700">Search All</label>
+                    <input type="text" name="keyword" id="keyword" placeholder="What are you looking for?" 
+                        class="w-full pl-12 pr-4 py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl text-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
+                        required>
+                </div>
+
+                <!-- Platform Selection -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
+                    <h3 class="text-lg font-semibold text-white mb-4 flex items-center">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        Select Platforms
+                    </h3>
+                    <div class="space-y-4">
+                        <!-- Amazon -->
+                        <label class="flex items-center group cursor-pointer p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
+                            <div class="relative">
+                                <input type="checkbox" name="amazonbutton" id="amazonbutton" value="amazon" class="absolute opacity-0 w-0 h-0">
+                                <div class="checkbox-custom w-6 h-6 bg-white/20 border-2 border-white/30 rounded-lg transition-all duration-300 flex items-center justify-center">
+                                    <svg class="check-icon w-4 h-4 text-white opacity-0 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4 flex items-center">
+                                <span class="text-orange-400 text-lg mr-2">🛍️</span>
+                                <span class="text-white group-hover:text-blue-300 transition-colors font-medium">Amazon</span>
+                            </div>
+                        </label>
+
+                        <!-- eBay -->
+                        <label class="flex items-center group cursor-pointer p-3 rounded-xl hover:bg-white/5 transition-all duration-200">
+                            <div class="relative">
+                                <input type="checkbox" name="EbayButton" id="EbayButton" value="Ebay" class="absolute opacity-0 w-0 h-0">
+                                <div class="checkbox-custom w-6 h-6 bg-white/20 border-2 border-white/30 rounded-lg transition-all duration-300 flex items-center justify-center">
+                                    <svg class="check-icon w-4 h-4 text-white opacity-0 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4 flex items-center">
+                                <span class="text-blue-400 text-lg mr-2">🏪</span>
+                                <span class="text-white group-hover:text-blue-300 transition-colors font-medium">eBay</span>
+                            </div>
+                        </label>
+
+                        <!-- Search All -->
+                        <label class="flex items-center group cursor-pointer p-3 rounded-xl hover:bg-white/5 transition-all duration-200 border border-purple-500/30">
+                            <div class="relative">
+                                <input type="checkbox" name="searchall" id="searchall" value="searchall" class="absolute opacity-0 w-0 h-0">
+                                <div class="checkbox-custom w-6 h-6 bg-white/20 border-2 border-white/30 rounded-lg transition-all duration-300 flex items-center justify-center">
+                                    <svg class="check-icon w-4 h-4 text-white opacity-0 transition-opacity duration-200" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="ml-4 flex items-center">
+                                <span class="text-purple-400 text-lg mr-2">🌐</span>
+                                <span class="text-white group-hover:text-purple-300 transition-colors font-semibold">Search All Platforms</span>
+                            </div>
+                        </label>
                     </div>
                 </div>
-            </div>
-            <div>
-                <button type="submit"
-                    class="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600 transition-colors">
-                    Search
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-4 px-6 rounded-2xl shadow-lg transform transition-all duration-200 hover:scale-[1.02] hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900 flex items-center justify-center">
+                    <span id="btnText">Start Searching</span>
+                    <i data-lucide="arrow-right" id="btnIcon" class="w-5 h-5 ml-2"></i>
+                    <div id="loadingSpinner" class="hidden">
+                        <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
                 </button>
+            </form>
+
+            <!-- Features -->
+            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="text-gray-300">
+                    <i data-lucide="zap" class="w-6 h-6 mx-auto mb-2 text-yellow-400"></i>
+                    <p class="text-sm">Lightning Fast</p>
+                </div>
+                <div class="text-gray-300">
+                    <i data-lucide="shield-check" class="w-6 h-6 mx-auto mb-2 text-green-400"></i>
+                    <p class="text-sm">Secure & Reliable</p>
+                </div>
+                <div class="text-gray-300">
+                    <i data-lucide="trending-up" class="w-6 h-6 mx-auto mb-2 text-blue-400"></i>
+                    <p class="text-sm">Best Prices</p>
+                </div>
             </div>
-        </form>
-
+        </div>
     </div>
-</body>
 
+    <script>
+        // Custom checkbox functionality
+        function initializeCheckboxes() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                const customBox = checkbox.nextElementSibling;
+                const checkIcon = customBox.querySelector('.check-icon');
+
+                // Set initial state
+                updateCheckboxVisual(checkbox, customBox, checkIcon);
+
+                // Handle click events
+                checkbox.addEventListener('change', function() {
+                    updateCheckboxVisual(this, customBox, checkIcon);
+                    handleCheckboxLogic(this);
+                });
+            });
+        }
+
+        function updateCheckboxVisual(checkbox, customBox, checkIcon) {
+            if (checkbox.checked) {
+                customBox.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'border-transparent');
+                customBox.classList.remove('bg-white/20', 'border-white/30');
+                checkIcon.classList.remove('opacity-0');
+                checkIcon.classList.add('opacity-100');
+            } else {
+                customBox.classList.remove('bg-gradient-to-r', 'from-blue-500', 'to-purple-600', 'border-transparent');
+                customBox.classList.add('bg-white/20', 'border-white/30');
+                checkIcon.classList.remove('opacity-100');
+                checkIcon.classList.add('opacity-0');
+            }
+        }
+
+        function handleCheckboxLogic(currentCheckbox) {
+            const amazonBtn = document.getElementById('amazonbutton');
+            const ebayBtn = document.getElementById('EbayButton');
+            const searchAllBtn = document.getElementById('searchall');
+
+            if (currentCheckbox.id === 'searchall' && currentCheckbox.checked) {
+                // If "Search All" is checked, uncheck individual platforms
+                amazonBtn.checked = false;
+                ebayBtn.checked = false;
+                updateAllCheckboxVisuals();
+            } else if ((currentCheckbox.id === 'amazonbutton' || currentCheckbox.id === 'EbayButton') && currentCheckbox.checked) {
+                // If individual platform is checked, uncheck "Search All"
+                searchAllBtn.checked = false;
+                updateAllCheckboxVisuals();
+            }
+        }
+
+        function updateAllCheckboxVisuals() {
+            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+                const customBox = checkbox.nextElementSibling;
+                const checkIcon = customBox.querySelector('.check-icon');
+                updateCheckboxVisual(checkbox, customBox, checkIcon);
+            });
+        }
+
+        // Form submission with loading state
+        document.getElementById('searchForm').addEventListener('submit', function(e) {
+            const submitBtn = document.getElementById('submitBtn');
+            const btnText = document.getElementById('btnText');
+            const btnIcon = document.getElementById('btnIcon');
+            const loadingSpinner = document.getElementById('loadingSpinner');
+            
+            // Validate that at least one platform is selected
+            const amazonBtn = document.getElementById('amazonbutton');
+            const ebayBtn = document.getElementById('EbayButton');
+            const searchAllBtn = document.getElementById('searchall');
+            
+            if (!amazonBtn.checked && !ebayBtn.checked && !searchAllBtn.checked) {
+                e.preventDefault();
+                alert('Please select at least one platform to search!');
+                return;
+            }
+            
+            // Show loading state
+            btnText.textContent = 'Searching...';
+            btnIcon.classList.add('hidden');
+            loadingSpinner.classList.remove('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+        });
+
+        // Initialize when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCheckboxes();
+        });
+    </script>
+</body>
 
 </html>
