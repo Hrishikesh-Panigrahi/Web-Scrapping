@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Web Crawler – Save Reels &amp; Videos</title>
+    <script src="/static/js/tailwind-config.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="/static/css/app.css" rel="stylesheet">
+    <script src="/static/js/dark-mode.js"></script>
+</head>
+
+<body class="min-h-screen bg-gray-50 text-gray-900 dark:bg-zinc-950 dark:text-zinc-100 font-sans antialiased transition-colors">
+    <nav class="border-b border-gray-200 bg-white dark:border-zinc-800 dark:bg-zinc-900/80 transition-colors">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
+            <a href="/" class="flex items-center gap-2 text-gray-700 dark:text-zinc-300 font-medium">
+                <i data-lucide="sparkles" class="w-5 h-5 text-violet-500"></i>
+                Smart Web Crawler
+            </a>
+            <button type="button" id="darkModeToggle" aria-label="Toggle dark mode"
+                class="relative w-14 h-8 rounded-full bg-gray-200 dark:bg-zinc-600 border border-gray-300 dark:border-zinc-500 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:ring-offset-2 dark:focus:ring-offset-zinc-950">
+                <span class="absolute left-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-white dark:bg-zinc-800 shadow-md ring-0 transition-transform duration-300 ease-out translate-x-0 dark:translate-x-6">
+                    <i data-lucide="sun" class="toggle-icon-light h-3.5 w-3.5 text-amber-500 dark:hidden"></i>
+                    <i data-lucide="moon" class="toggle-icon-dark hidden h-3.5 w-3.5 text-zinc-400 dark:block"></i>
+                </span>
+            </button>
+        </div>
+    </nav>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+        <!-- Hero + URL input -->
+        <section class="text-center mb-16">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+                Save Instagram Reels &amp; YouTube videos as MP4
+            </h1>
+            <p class="mt-4 text-gray-600 dark:text-zinc-400 max-w-xl mx-auto">
+                Paste any Reel or video URL and download it.
+            </p>
+
+            <form id="landingDownloadForm"
+                hx-post="/download"
+                hx-target="#landingResult"
+                hx-swap="innerHTML"
+                hx-indicator="#landingSpinner"
+                class="mt-8 max-w-xl mx-auto flex flex-col sm:flex-row gap-3">
+                <div class="flex-1 relative">
+                    <label for="landing_url" class="sr-only">Video URL</label>
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 dark:text-zinc-500">
+                        <i data-lucide="link" class="w-5 h-5"></i>
+                    </div>
+                    <input type="text" name="url" id="landing_url" inputmode="url" autocomplete="url" placeholder="Paste Instagram or YouTube URL..."
+                        class="w-full pl-12 pr-4 py-3.5 rounded-xl bg-gray-100 dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-900 dark:text-zinc-100 placeholder-gray-400 dark:placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-400 dark:focus:border-violet-500 transition-colors"
+                        required>
+                </div>
+                <button type="submit"
+                    class="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-semibold shadow-lg shadow-violet-500/25 transition-all focus:outline-none focus:ring-2 focus:ring-violet-500/50 disabled:opacity-60 shrink-0">
+                    <span id="landingSpinner" class="htmx-indicator inline-flex items-center gap-2">
+                        <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Downloading...
+                    </span>
+                    <span class="htmx-indicator-remove inline-flex items-center gap-2">
+                        <i data-lucide="download" class="w-5 h-5"></i>
+                        Download
+                    </span>
+                </button>
+            </form>
+            <div id="landingResult" class="mt-4 min-h-[1.5rem] text-sm text-gray-600 dark:text-zinc-400"></div>
+        </section>
+
+        <!-- Supported sources -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-20">
+            <div class="rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 shadow-sm dark:shadow-none transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center mb-4">
+                    <i data-lucide="instagram" class="w-5 h-5 text-white"></i>
+                </div>
+                <h2 class="font-semibold text-gray-900 dark:text-white">Instagram Reels</h2>
+                <p class="mt-1 text-sm text-gray-600 dark:text-zinc-400">Paste any Reel or post URL and download as MP4.</p>
+            </div>
+            <div class="rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 shadow-sm dark:shadow-none transition-colors">
+                <div class="w-10 h-10 rounded-lg bg-red-600 flex items-center justify-center mb-4">
+                    <i data-lucide="youtube" class="w-5 h-5 text-white"></i>
+                </div>
+                <h2 class="font-semibold text-gray-900 dark:text-white">YouTube</h2>
+                <p class="mt-1 text-sm text-gray-600 dark:text-zinc-400">Paste any video URL and download as MP4.</p>
+            </div>
+        </section>
+
+        <!-- About -->
+        <section class="rounded-xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 p-6 sm:p-8 shadow-sm dark:shadow-none transition-colors">
+            <h2 class="flex items-center gap-2 text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                <i data-lucide="info" class="w-5 h-5 text-violet-500"></i>
+                About this
+            </h2>
+            <div class="prose prose-gray dark:prose-invert max-w-none text-gray-600 dark:text-zinc-400 text-sm space-y-4">
+                <p><strong class="text-gray-800 dark:text-zinc-200">What to do:</strong> Paste an Instagram or YouTube URL above and click Download. We detect the source and save the video as MP4.</p>
+                <p><strong class="text-gray-800 dark:text-zinc-200">Why use this:</strong> Save Reels and videos locally so you can keep them forever. Watch offline, archive favorites, or back up content without relying on the platform.</p>
+            </div>
+        </section>
+    </main>
+
+    <script src="/static/js/app.js"></script>
+    <script src="/static/js/landing.js"></script>
+</body>
+
+</html>

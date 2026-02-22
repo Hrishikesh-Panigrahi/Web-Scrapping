@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
@@ -193,4 +194,58 @@ func ShowResults(c *gin.Context) {
 		"Productbody": productbody,
 		"Title":       "Search Results",
 	})
+}
+
+// Landing renders the landing page.
+func Landing(c *gin.Context) {
+	c.HTML(http.StatusOK, "landing.html", gin.H{
+		"Title": "Smart Web Crawler – Save Reels & Videos",
+	})
+}
+
+// Dashboard renders the main crawl dashboard (Instagram Reels + YouTube MP4).
+func Dashboard(c *gin.Context) {
+	c.HTML(http.StatusOK, "dashboard.html", gin.H{
+		"Title": "Smart Web Crawler",
+	})
+}
+
+// InstagramCrawl handles Instagram URL crawl request (UI + stub; integrate headless browser later).
+func InstagramCrawl(c *gin.Context) {
+	url := c.PostForm("url")
+	if url == "" {
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(`<p class="text-amber-500 dark:text-amber-400">Please enter an Instagram URL.</p>`))
+		return
+	}
+	// TODO: integrate headless browser (e.g. Playwright/Chromedp) to crawl Instagram
+	_ = CrawlInstagramWithHeadless(url) // stub for now
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(`<p class="text-emerald-600 dark:text-emerald-400">Download requested. Integrate headless browser to save Reel as MP4.</p>`))
+}
+
+// YouTubeDownload handles YouTube URL download request (UI + stub; integrate yt-dlp later).
+func YouTubeDownload(c *gin.Context) {
+	url := c.PostForm("url")
+	if url == "" {
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(`<p class="text-amber-500 dark:text-amber-400">Please enter a YouTube URL.</p>`))
+		return
+	}
+	// TODO: integrate yt-dlp to download MP4
+	_ = DownloadYouTubeMP4(url) // stub for now
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(`<p class="text-emerald-600 dark:text-emerald-400">Download requested. Integrate yt-dlp to save MP4.</p>`))
+}
+
+// Download handles unified download from landing page. Accepts a single URL; internally identify Instagram vs YouTube.
+func Download(c *gin.Context) {
+	url := strings.TrimSpace(c.PostForm("url"))
+	if url == "" {
+		c.Data(http.StatusBadRequest, "text/html; charset=utf-8", []byte(`<p class="text-amber-500 dark:text-amber-400">Please enter a URL.</p>`))
+		return
+	}
+	// Prepend https:// if no scheme
+	if !strings.HasPrefix(url, "http://") && !strings.HasPrefix(url, "https://") {
+		url = "https://" + url
+	}
+	// TODO: internally identify URL type (Instagram vs YouTube) and dispatch accordingly
+	_ = ProcessDownloadURL(url)
+	c.Data(http.StatusOK, "text/html; charset=utf-8", []byte(`<p class="text-emerald-600 dark:text-emerald-400">Download requested. Integrate URL detection and download logic.</p>`))
 }

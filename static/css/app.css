@@ -1,0 +1,13 @@
+/**
+ * Shared styles for Smart Web Crawler.
+ * HTMX indicator visibility during requests.
+ */
+.htmx-indicator {
+  display: none;
+}
+.htmx-request .htmx-indicator {
+  display: inline-flex;
+}
+.htmx-request .htmx-indicator-remove {
+  display: none;
+}

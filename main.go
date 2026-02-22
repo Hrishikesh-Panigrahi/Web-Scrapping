@@ -39,6 +39,9 @@ func main() {
 	// Load HTML templates
 	r.LoadHTMLGlob("templates/*")
 
+	// Static assets (JS, CSS)
+	r.Static("/static", "./static")
+
 	// Health check endpoint
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
@@ -48,8 +51,17 @@ func main() {
 		})
 	})
 
-	// API routes
-	r.GET("/", controllers.Index)
+	// Landing page
+	r.GET("/", controllers.Landing)
+	r.POST("/download", controllers.Download)
+
+	// App dashboard (Instagram Reels + YouTube MP4 download)
+	r.GET("/app", controllers.Dashboard)
+	r.POST("/crawl/instagram", controllers.InstagramCrawl)
+	r.POST("/download/youtube", controllers.YouTubeDownload)
+
+	// Legacy product search
+	r.GET("/search", controllers.Index)
 
 	// Apply input validation for POST routes
 	searchGroup := r.Group("/")
