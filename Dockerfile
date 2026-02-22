@@ -39,8 +39,8 @@ COPY --from=builder /etc/group /etc/group
 # Copy built application
 COPY --from=builder /app/main /app/main
 
-# Copy templates
-COPY --from=builder /app/templates /app/templates
+# Copy UI (templates + static)
+COPY --from=builder /app/ui /app/ui
 
 # Set working directory
 WORKDIR /app

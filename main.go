@@ -37,10 +37,10 @@ func main() {
 	// r.Use(middleware.RateLimitMiddleware())
 
 	// Load HTML templates
-	r.LoadHTMLGlob("templates/*")
+	r.LoadHTMLGlob("ui/templates/*")
 
 	// Static assets (JS, CSS)
-	r.Static("/static", "./static")
+	r.Static("/static", "./ui/static")
 
 	// Health check endpoint
 	r.GET("/health", func(c *gin.Context) {
